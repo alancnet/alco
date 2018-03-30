@@ -18,6 +18,7 @@ const fromStream = (stream) => rx.Observable.create(obs => {
   stream.setEncoding('utf8')
   stream.on('readable', () => obs.next(process.stdin.read()))
   stream.on('end', () => obs.complete())
+  return () => stream.end()
 })
 const fromStdin = () => fromStream(process.stdin)
 const fromStdinLines = () => rxx(fromStdin()).splitBy('\n').base
