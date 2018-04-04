@@ -22,6 +22,7 @@ const rxx = extend(Observable, {
         output.push(message)
         l = r + 1
       }
+      buffer.push(chunk.slice(l))
       return output
     })
   },
