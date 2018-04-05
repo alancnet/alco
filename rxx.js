@@ -82,6 +82,32 @@ const rxx = extend(Observable, {
         subscriptions.forEach((sub) => sub.dispose())
       }
     })
+  },
+  onPause: function (action, ms = 0) {
+    return Observable.create(observer => {
+      let timer = setTimeout(action, ms)
+      this.subscribe(
+        v => {
+          if (timer) clearTimeout(timer)
+          timer = setTimeout(action, ms)
+          observer.next(v)
+        },
+        e => {
+          if (timer) clearTimeout(timer)
+          observer.error(e)
+        },
+        () => {
+          if (timer) clearTimeout(timer)
+          observer.complete()
+        }
+      )
+    })
+
+    //states:
+    //  Live - Something emitted since last tick
+    //  Paused - Nothing emitted since last tick
+    //  Idle - Nothing emitted since last signal
+
   }
 })
 

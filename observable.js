@@ -22,4 +22,28 @@ const fromStream = (stream) => rx.Observable.create(obs => {
 })
 const fromStdin = () => fromStream(process.stdin)
 const fromStdinLines = () => rxx(fromStdin()).splitBy('\n').base
-module.exports = {fromReadLine, fromStdin, fromStream, fromStdinLines}
+const onDemand = (fetcher) => {
+  let observer = null;
+  const observable = rx.Observable.create(o => {
+    if (observer) throw new Error('Demand Observable can have only one observer')
+    observer = o
+    return () => {
+      observer = null
+    }
+  })
+  observable.demand = () => {
+    fetcher()
+    .then(
+      v => observer && (
+        v === undefined
+        ? observer.complete()
+        : observer.next(v)
+      ),
+      e => observer && observer.error(e),
+      () => observer && observer.complete()
+    )
+  }
+  return observable
+}
+
+module.exports = {fromReadLine, fromStdin, fromStream, fromStdinLines, onDemand}

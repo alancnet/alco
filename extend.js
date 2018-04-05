@@ -1,9 +1,10 @@
 const extend = (Class, behavior) => {
   const name = behavior.name || `Extended${Class.name}`
   const baseName = behavior.baseName || 'base'
-  const ExtendedClass = function (instance) {
-    if (!(this instanceof ExtendedClass)) return new ExtendedClass(instance)
+  const ExtendedClass = function (instance, __parent) {
+    if (!(this instanceof ExtendedClass)) return new ExtendedClass(instance, __parent)
     this[baseName] = instance
+    this.__parent = __parent
   }
   Object.defineProperty(ExtendedClass, 'name', {
     writable: false,
@@ -17,7 +18,7 @@ const extend = (Class, behavior) => {
           ExtendedClass.prototype[key] = function () {
             const ret = fn.apply(this[baseName], arguments)
             if (ret instanceof ExtendedClass) return ret
-            if (ret instanceof Class) return new ExtendedClass(ret)
+            if (ret instanceof Class) return new ExtendedClass(ret, this)
             else return ret
           }
         } else {
@@ -41,7 +42,7 @@ const extend = (Class, behavior) => {
       ExtendedClass.prototype[key] = function () {
         const ret = fn.apply(this, arguments)
         if (ret instanceof ExtendedClass) return ret
-        if (ret instanceof Class) return new ExtendedClass(ret)
+        if (ret instanceof Class) return new ExtendedClass(ret, this)
         else return ret
       }
     }
