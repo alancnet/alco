@@ -27,7 +27,7 @@ const rxx = extend(Observable, {
     })
   },
   flattenParallel: function (limit) {
-    return Observable.create((observer) => {
+    return rxx(Observable.create((observer) => {
       var count = 0
       var complete = false
       const queue = []
@@ -81,10 +81,10 @@ const rxx = extend(Observable, {
       return () => {
         subscriptions.forEach((sub) => sub.dispose())
       }
-    })
+    }))
   },
   onPause: function (action, ms = 0) {
-    return Observable.create(observer => {
+    return rxx(Observable.create(observer => {
       let timer = setTimeout(action, ms)
       this.subscribe(
         v => {
@@ -101,14 +101,21 @@ const rxx = extend(Observable, {
           observer.complete()
         }
       )
-    })
+    }))
 
     //states:
     //  Live - Something emitted since last tick
     //  Paused - Nothing emitted since last tick
     //  Idle - Nothing emitted since last signal
 
+  },
+  flatMap: function(mapper) {
+    return rxx(this.base.flatMap((value, index) => mapper(value, index, this)))
+  },
+  map: function(mapper) {
+    return rxx(this.base.map((value, index) => mapper(value, index, this)))
   }
+
 })
 
 module.exports = rxx
