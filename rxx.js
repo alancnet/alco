@@ -114,8 +114,10 @@ const rxx = extend(Observable, {
   },
   map: function(mapper) {
     return rxx(this.base.map((value, index) => mapper(value, index, this)))
+  },
+  subscribe: function() {
+    return this.base.subscribe.apply(this.base, arguments)
   }
-
 })
 
 module.exports = rxx
